@@ -8,11 +8,17 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :oauth2Google, Oauth2GoogleWeb.Endpoint,
   http: [port: 4000],
+  https: [port: 4443,
+  otp_app: :oauth2Google,
+  keyfile: "priv/keys/localhost.key",
+  certfile: "priv/keys/localhost.cert"],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin",
                     cd: Path.expand("../assets", __DIR__)]]
+
+
 
 # ## SSL Support
 #
@@ -67,3 +73,8 @@ config :oauth2Google, Oauth2Google.Repo,
       client_id: System.get_env("GOOGLE_CLIENT_ID"),
       client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
       redirect_uri: System.get_env("GOOGLE_REDIRECT_URI")
+
+      config :oauth2Google, Facebook,
+        client_id: System.get_env("FACEBOOK_CLIENT_ID"),
+        client_secret: System.get_env("FACEBOOK_CLIENT_SECRET"),
+        redirect_uri: System.get_env("FACEBOOK_REDIRECT_URI")
