@@ -1,7 +1,8 @@
 
 defmodule Oauth2GoogleWeb.AuthController do
   use  Oauth2GoogleWeb, :controller
-
+  alias Oauth2Google.Accounts.User
+  alias Oauth2Google.Repo
   @doc """
  This action is reached via `/auth/:provider` and redirects to the OAuth2 provider
  based on the chosen strategy.
@@ -25,19 +26,57 @@ defmodule Oauth2GoogleWeb.AuthController do
  """
  def callback(conn, %{"provider" => provider, "code" => code}) do
    client = get_token!(provider, code)
-
+   IO.puts("++++++++++++")
+   IO.inspect(client)
    user = get_user!(provider, client)
+
+   IO.puts("++++++++++++")
+   IO.inspect(conn.assigns)
+   IO.puts("++++++++++++")
+IO.inspect(user)
+IO.puts("++++++++++++")
+IO.inspect(provider)
+IO.puts("++++++++++++")
+IO.inspect(client)
 
    conn
    |> put_session(:current_user, user)
    |> put_session(:access_token, client.token.access_token)
    |> redirect(to: "/")
+
+   user_params = %{token: client.token.access_token, email: user.email, provider: provider}
+   changeset = User.changeset(%User{}, user_params)
+   signin(conn,changeset)
  end
 
+ defp signin(conn, changeset) do
+   case insert_or_update_user(changeset) do
+     {:ok, user} ->
+       conn
+       |> put_flash(:info, "Welcome back!")
+       |> put_session(:user_id, user.id)
+       |> redirect(to: "/")
+
+     {:error, _reason} ->
+       conn
+       |> put_flash(:error, "Error signing in")
+       |> redirect(to: "/")
+   end
+ end
+
+ defp insert_or_update_user(changeset) do
+  # changes is a property of changeset
+  case Repo.get_by(User, email: changeset.changes.email) do
+    nil ->
+      Repo.insert(changeset)
+    user ->
+      {:ok, user} #adding :ok atom as for insert we are returned a tuple
+  end
+end
 
   defp authorize_url!("github"),   do: GitHub.authorize_url!
  defp authorize_url!("google"),   do: Google.authorize_url!(scope: "https://www.googleapis.com/auth/userinfo.email")
- defp authorize_url!("facebook"), do: Facebook.authorize_url!(scope: "user_photos")
+ defp authorize_url!("facebook"), do: Facebook.authorize_url!(scope: "email,public_profile")
  defp authorize_url!(_), do: raise "No matching provider available"
 
  defp get_token!("google", code),   do: Google.get_token!(code: code)
@@ -47,16 +86,20 @@ defmodule Oauth2GoogleWeb.AuthController do
 
  defp get_user!("github", client) do
    %{body: user} = OAuth2.Client.get!(client, "/user")
-   %{name: user["name"], avatar: user["avatar_url"]}
+   %{name: user["name"], avatar: user["avatar_url"], email: user["email"]}
  end
 
  defp get_user!("google", client) do
    %{body: user, status_code: status} = OAuth2.Client.get!(client, "https://www.googleapis.com/plus/v1/people/me/openIdConnect")
-   %{name: user["name"], domain: user["hd"], email_verified: user["email_verified"], avatar: user["picture"]}
+   %{name: user["name"], domain: user["hd"], email_verified: user["email_verified"], avatar: user["picture"], email: user["email"]}
  end
 
  defp get_user!("facebook", client) do
-   %{body: user} = OAuth2.Client.get!(client, "/me", fields: "id,name")
-   %{name: user["name"], avatar: "https://graph.facebook.com/#{user["id"]}/picture"}
+   IO.puts("++++++++++ client")
+   IO.inspect(client)
+   IO.puts("++++++++++")
+   %{body: user} = OAuth2.Client.get!(client, "/me")
+   IO.inspect(user)
+   %{name: user["name"], avatar: "https://graph.facebook.com/#{user["id"]}/picture", email: user["email"]}
  end
 end

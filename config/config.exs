@@ -23,10 +23,24 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-  config :oauth2Google, Google,
-    client_id: System.get_env("CLIENT_ID"),
-    client_secret: System.get_env("CLIENT_SECRET"),
-    redirect_uri: System.get_env("REDIRECT_URI")
+
+    config :oauth2Google, GitHub,
+      client_id: System.get_env("GITHUB_CLIENT_ID"),
+      client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
+      redirect_uri: System.get_env("GITHUB_REDIRECT_URI")
+
+    config :oauth2Google, Google,
+        client_id: System.get_env("GOOGLE_CLIENT_ID"),
+        client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
+        redirect_uri: System.get_env("GOOGLE_REDIRECT_URI")
+
+    config :oauth2Google, Facebook,
+          client_id: System.get_env("FACEBOOK_CLIENT_ID"),
+          client_secret: System.get_env("FACEBOOK_CLIENT_SECRET"),
+          redirect_uri: System.get_env("FACEBOOK_REDIRECT_URI"),
+          default_scope: "email,public_profile",
+           profile_fields: "id,email,gender,link,locale,name,timezone,updated_time,verified"
+
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

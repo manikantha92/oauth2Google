@@ -62,19 +62,3 @@ config :oauth2Google, Oauth2Google.Repo,
   database: "oauth2google_dev",
   hostname: "localhost",
   pool_size: 10
-
-
-  config :oauth2Google, GitHub,
-    client_id: System.get_env("GITHUB_CLIENT_ID"),
-    client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
-    redirect_uri: System.get_env("GITHUB_REDIRECT_URI")
-
-    config :oauth2Google, Google,
-      client_id: System.get_env("GOOGLE_CLIENT_ID"),
-      client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
-      redirect_uri: System.get_env("GOOGLE_REDIRECT_URI")
-
-      config :oauth2Google, Facebook,
-        client_id: System.get_env("FACEBOOK_CLIENT_ID"),
-        client_secret: System.get_env("FACEBOOK_CLIENT_SECRET"),
-        redirect_uri: System.get_env("FACEBOOK_REDIRECT_URI")
